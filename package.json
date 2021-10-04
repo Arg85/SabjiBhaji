@@ -4,6 +4,7 @@
   "description": "sabji api",
   "main": "index.js",
   "scripts": {
+    "serve:local":"nodemon index.js",
     "test": "npm test"
   },
   "keywords": [
@@ -14,5 +15,8 @@
   "dependencies": {
     "axios": "^0.21.4",
     "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.13"
   }
 }
