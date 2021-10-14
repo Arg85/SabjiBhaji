@@ -1,19 +1,20 @@
 const ProductCategoryModel = require('../models/productCategoryModel')
 const User = require('../models/UserModel')
-
+const path = require('path')
+const fs = require('fs')
 exports.addProductCategory = async (req, res, next) => {
-  const user = await User.findOne({ username: req.body.username })
+  // const user = await User.findOne({ username: req.body.username })
   const newProduct = new ProductCategoryModel({
     productCategoryName: req.body.Category,
     productCategoryImage: req.file.path
   })
   try {
-    if (!user.isAdmin) {
-      const error = new Error('Unauthorized')
-      console.log(error)
-      error.statusCode = 401
-      throw error
-    }
+    // if (!user.isAdmin || user.isAdmin == null) {
+    //   const error = new Error('Unauthorized')
+    //   console.log(error)
+    //   error.statusCode = 401
+    //   throw error
+    // }
     const savedProduct = await newProduct.save()
     res.json({
       productCategoryName: savedProduct.productCategoryName,
@@ -54,8 +55,8 @@ exports.productCategories = async (req, res, next) => {
   }
 }
 exports.deleteProductCategory = async (req, res, next) => {
+  console.log(req,"jiii")
   const user = await User.findOne({ username: req.body.username })
-
   const categoryId = req.params.categoryId
   try {
     if (!user.isAdmin) {
@@ -82,9 +83,12 @@ exports.deleteProductCategory = async (req, res, next) => {
   }
 }
 exports.updateProductCategory = async (req, res, next) => {
+  console.log(req.body.username)
+  const user = await User.findOne({ username: req.body.username })
   const categoryId = req.params.categoryId
-  console.log(req.body.category)
-  console.log('adding prod', req.file.path)
+  // console.log(req.body.category)
+  // console.log('adding prod', req.file.path)
+  console.log(user.isAdmin, 'addy hu')
   console.log(categoryId)
   if (!req.body.category == null && req.file.path == null) {
     const error = new Error('Enter Valid Product Image and Name')
@@ -92,7 +96,14 @@ exports.updateProductCategory = async (req, res, next) => {
     throw error
   }
   try {
-    await ProductCategoryModel.findByIdAndUpdate(categoryId, { productCategoryName: req.body.category },
+    if (!user.isAdmin) {
+      const error = new Error('Unauthorized')
+      console.log(error)
+      error.statusCode = 401
+      throw error
+    }
+
+    await ProductCategoryModel.findByIdAndUpdate(categoryId, { productCategoryName: req.body.category, productCategoryImage: req.file.path },
       function (err, docs) {
         console.log('this id docs and error')
         if (err) {
@@ -100,7 +111,8 @@ exports.updateProductCategory = async (req, res, next) => {
           error.statusCode = 404
           throw error
         } else {
-          console.log('Updated ProductCategory : ', docs)
+          console.log('Updated ProductCategory : ', docs.productCategoryImage)
+          clearImage(docs.productCategoryImage)
         }
       }).clone().catch((err) => console.log(err))
 
@@ -111,11 +123,13 @@ exports.updateProductCategory = async (req, res, next) => {
     if (!err.statusCode) {
       err.statusCode = 500
     }
-    console.log('error of acatch bolock', err)
+    console.log('error of catch bolock', err)
     next(err)
   }
 }
-// const clearImage = (filePath) => {
-//   filePath = path.join(__dirname, '..', filePath)
-//   fs.unlink(filePath, (err) => console.log(err))
-// }
+const clearImage = (filePath) => {
+  console.log(filePath)
+  filePath = path.join(__dirname, '..', filePath)
+  console.log(filePath, 'filepath final')
+  fs.unlink(filePath, (err) => console.log(err))
+}
