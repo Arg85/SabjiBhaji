@@ -1,4 +1,5 @@
-const generateToken = require('../utils.js')
+// const generateToken = require('../utils.js')
+const jwt = require('jsonwebtoken')
 const User = require('../models/UserModel')
 const bcrypt = require('bcryptjs')
 
@@ -17,7 +18,7 @@ exports.register = async (req, res, next) => {
       _id: newUser._id,
       name: savedUser.name,
       email: savedUser.email,
-      isAdmin: savedUser.isAdmin,
+      isAdmin: savedUser.isAdmin
     })
   } catch (err) {
     if (!err.statusCode) {
@@ -29,7 +30,6 @@ exports.register = async (req, res, next) => {
 
 exports.login = async (req, res, next) => {
   try {
-    console.log(req.body.username, req.body.password)
     const user = await User.findOne({ username: req.body.username })
     if (!user) {
       const error = new Error('User Does not exist')
@@ -42,7 +42,7 @@ exports.login = async (req, res, next) => {
         name: user.name,
         email: user.email,
         isAdmin: user.isAdmin,
-        token:jwt.sign({
+        token: jwt.sign({
           _id: user._id,
           name: user.name,
           email: user.email,

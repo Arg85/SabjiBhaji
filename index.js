@@ -1,6 +1,7 @@
 const express = require('express')
 const app = express()
 const cors = require('cors')
+
 // const multer = require('multer')
 // const GridFsStorage = require('multer-gridfs-storage')
 // const Grid = require('gridfs-stream')
@@ -20,7 +21,7 @@ app.use('/api/auth', authRoute)
 app.use('/api/product', productRoute)
 
 app.get('/', (req, res) => {
-  res.send('hello world')
+  res.send('Server is Serving')
 })
 app.use((error, req, res, next) => {
   const status = error.statusCode || 500
