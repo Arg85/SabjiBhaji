@@ -125,14 +125,14 @@ exports.updateProductCategory = async (req, res, next) => {
     if (!err.statusCode) {
       err.statusCode = 500
     }
-    // console.log('error of catch bolock', err)
+    console.log('error of catch bolock', err)
     next(err)
   }
 }
 const clearImage = (filePath) => {
-  // console.log(filePath)
+  console.log(filePath)
   filePath = path.join(__dirname, '..', filePath)
-  // console.log(filePath, 'filepath final')
+  console.log(filePath, 'filepath final')
   fs.unlink(filePath, function (err) {
     if (err) return console.log(err)
     console.log('file deleted successfully')
