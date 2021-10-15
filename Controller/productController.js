@@ -55,7 +55,7 @@ exports.productCategories = async (req, res, next) => {
   }
 }
 exports.deleteProductCategory = async (req, res, next) => {
-  console.log(req,"jiii")
+  console.log(req, 'jiii')
   const user = await User.findOne({ username: req.body.username })
   const categoryId = req.params.categoryId
   try {
@@ -102,8 +102,8 @@ exports.updateProductCategory = async (req, res, next) => {
       error.statusCode = 401
       throw error
     }
-
-    await ProductCategoryModel.findByIdAndUpdate(categoryId, { productCategoryName: req.body.category, productCategoryImage: req.file.path },
+    const imageUrl = await ProductCategoryModel.findById(categoryId)
+    const resy = await ProductCategoryModel.findByIdAndUpdate(categoryId, { $set: { productCategoryName: req.body.categoryName, productCategoryImage: req.file.path } },
       function (err, docs) {
         console.log('this id docs and error')
         if (err) {
@@ -112,7 +112,9 @@ exports.updateProductCategory = async (req, res, next) => {
           throw error
         } else {
           console.log('Updated ProductCategory : ', docs.productCategoryImage)
-          clearImage(docs.productCategoryImage)
+          clearImage(imageUrl.productCategoryImage)
+          // console.log(imageUrl, 'imageurl')
+          // console.log(imageUrl.productCategoryImage, 'I am product curr')
         }
       }).clone().catch((err) => console.log(err))
 
@@ -131,5 +133,8 @@ const clearImage = (filePath) => {
   console.log(filePath)
   filePath = path.join(__dirname, '..', filePath)
   console.log(filePath, 'filepath final')
-  fs.unlink(filePath, (err) => console.log(err))
+  fs.unlink(filePath, function (err) {
+    if (err) return console.log(err)
+    console.log('file deleted successfully')
+  })
 }
