@@ -1,7 +1,9 @@
 const ProductCategoryModel = require('../models/productCategoryModel')
 const User = require('../models/UserModel')
 const path = require('path')
+const mongoose = require('mongoose')
 const fs = require('fs')
+const productCategoryModel = require('../models/productCategoryModel')
 exports.addProductCategory = async (req, res, next) => {
   // const user = await User.findOne({ username: req.body.username })
   const newProduct = new ProductCategoryModel({
@@ -56,25 +58,28 @@ exports.productCategories = async (req, res, next) => {
 }
 exports.deleteProductCategory = async (req, res, next) => {
   // console.log(req, 'jiii')
-  const user = await User.findOne({ username: req.body.username })
-  const categoryId = req.params.categoryId
   try {
+    const user = await User.findOne({ username: req.body.username })
+    const categoryId = req.params.categoryId
+    console.log(categoryId, 'category id')
     if (!user.isAdmin) {
       const error = new Error('Unauthorized')
-      // console.log(error)
       error.statusCode = 401
       throw error
-    }
-    const category = await ProductCategoryModel.deleteOne({ categoryId })
-
-    if (!category) {
-      const error = new Error('Product Category Not Found')
-      error.statusCode = 404
-      throw error
-    }
+    }// now try
+    const result = await ProductCategoryModel.findOneAndDelete({ _id: categoryId.toString() }, (err, deldoc) => {
+      if (err) {
+        const error = new Error('Product Could not be found')
+        error.statusCode = 401
+        throw error
+      } else {
+        console.log(deldoc, 'docdeleted')
+      }
+    }).clone().catch((err) => console.log(err))
     res.status(200).json({
       message: 'Deleted Product Category'
     })
+    console.log(result)
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500
@@ -83,13 +88,8 @@ exports.deleteProductCategory = async (req, res, next) => {
   }
 }
 exports.updateProductCategory = async (req, res, next) => {
-  // console.log(req.body.username)
   const user = await User.findOne({ username: req.body.username })
   const categoryId = req.params.categoryId
-  // console.log(req.body.category)
-  // console.log('adding prod', req.file.path)
-  // console.log(user.isAdmin, 'addy hu')
-  // console.log(categoryId)
   if (!req.body.category == null && req.file.path == null) {
     const error = new Error('Enter Valid Product Image and Name')
     error.statusCode = 404
@@ -98,23 +98,18 @@ exports.updateProductCategory = async (req, res, next) => {
   try {
     if (!user.isAdmin) {
       const error = new Error('Unauthorized')
-      // console.log(error)
       error.statusCode = 401
       throw error
     }
     const imageUrl = await ProductCategoryModel.findById(categoryId)
     const resy = await ProductCategoryModel.findByIdAndUpdate(categoryId, { $set: { productCategoryName: req.body.categoryName, productCategoryImage: req.file.path } },
       function (err, docs) {
-        // console.log('this id docs and error')
         if (err) {
           const error = new Error('Product Category Unable to Update')
           error.statusCode = 404
           throw error
         } else {
-          // console.log('Updated ProductCategory : ', docs.productCategoryImage)
           clearImage(imageUrl.productCategoryImage)
-          // console.log(imageUrl, 'imageurl')
-          // console.log(imageUrl.productCategoryImage, 'I am product curr')
         }
       }).clone().catch((err) => console.log(err))
 
@@ -125,14 +120,11 @@ exports.updateProductCategory = async (req, res, next) => {
     if (!err.statusCode) {
       err.statusCode = 500
     }
-    console.log('error of catch bolock', err)
     next(err)
   }
 }
 const clearImage = (filePath) => {
-  console.log(filePath)
   filePath = path.join(__dirname, '..', filePath)
-  console.log(filePath, 'filepath final')
   fs.unlink(filePath, function (err) {
     if (err) return console.log(err)
     console.log('file deleted successfully')

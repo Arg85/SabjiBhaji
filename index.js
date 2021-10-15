@@ -14,7 +14,12 @@ dotenv.config()
 app.use(express.json())
 const mongoose = require('mongoose')
 app.use(cors())
-
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*') // Replace '*' from domain which you want to access
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE')
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+  next()
+})
 app.use('/images', express.static('images'))
 app.use('/api/user', userRoute)
 app.use('/api/auth', authRoute)
