@@ -67,13 +67,15 @@ exports.deleteProductCategory = async (req, res, next) => {
       error.statusCode = 401
       throw error
     }// now try
-    const result = await ProductCategoryModel.findOneAndDelete({ _id: categoryId.toString() }, (err, deldoc) => {
+
+    const result = await ProductCategoryModel.deleteOne({ _id: categoryId }, (err, deldoc) => {
       if (err) {
         const error = new Error('Product Could not be found')
         error.statusCode = 401
         throw error
       } else {
         console.log(deldoc, 'docdeleted')
+        // clearImage()
       }
     }).clone().catch((err) => console.log(err))
     res.status(200).json({
