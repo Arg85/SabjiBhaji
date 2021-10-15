@@ -81,7 +81,6 @@ exports.deleteProductCategory = async (req, res, next) => {
     res.status(200).json({
       message: 'Deleted Product Category'
     })
-  
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500
