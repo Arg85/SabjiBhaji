@@ -73,14 +73,12 @@ exports.deleteProductCategory = async (req, res, next) => {
         const error = new Error('Product Could not be found')
         error.statusCode = 401
         throw error
-      } else {
-        console.log(deldoc, 'docdeleted')
-        clearImage(result.productCategoryImage)
       }
     }).clone().catch((err) => console.log(err))
     res.status(200).json({
       message: 'Deleted Product Category'
     })
+    clearImage(result.productCategoryImage)
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500
