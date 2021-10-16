@@ -1,16 +1,14 @@
 const ProductCategoryModel = require('../models/productCategoryModel')
 const User = require('../models/UserModel')
 const path = require('path')
-const mongoose = require('mongoose')
 const fs = require('fs')
-const productCategoryModel = require('../models/productCategoryModel')
 exports.addProductCategory = async (req, res, next) => {
   // const user = await User.findOne({ username: req.body.username })
-  const newProduct = new ProductCategoryModel({
-    productCategoryName: req.body.Category,
-    productCategoryImage: req.file.path
-  })
   try {
+    const newProduct = new ProductCategoryModel({
+      productCategoryName: req.body.Category,
+      productCategoryImage: req.file.path
+    })
     // if (!user.isAdmin || user.isAdmin == null) {
     //   const error = new Error('Unauthorized')
     //   console.log(error)
