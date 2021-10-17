@@ -27,20 +27,44 @@ exports.addProductCategory = async (req, res, next) => {
   }
 }
 exports.addProduct = async (req, res, next) => {
-  const newProduct = new ProductCategoryModel({
-    productCategoryName: req.body.Category,
-    productCategoryImage: req.file.path
-  })
+  // const ProductCategory = await ProductCategoryModel.findOne({ _id: req.params.categoryId })
+  // console.log(ProductCategory, 'produ ch')
+  // ProductCategory.products.productName : req.body.productName
   try {
-    const savedProduct = await newProduct.save()
-    res.json({
-      productCategoryName: savedProduct.productCategoryName,
-      productCategoryImage: savedProduct.productCategoryImage,
-      _id: newProduct._id
+    const user = await User.findOne({ username: req.body.username })
+    if (!user.isAdmin) {
+      const error = new Error('Unauthorized')
+      error.statusCode = 401
+      throw error
+    }// now try
+
+    const productCategory = await ProductCategoryModel.findOne({ _id: req.params.categoryId })
+    productCategory.products.push({
+      productName: req.body.productName,
+      productImage: req.file.path,
+      productPrice: req.body.productPrice
     })
+
+    const updated = await productCategory.save()
+    console.log(updated)
+    res.status(200).json({ message: 'Succesfuly added product' })
   } catch (err) {
-    console.log(err)
-    res.status(500).json(err)
+    if (!err.statusCode) {
+      err.statusCode = 500
+    }
+    next(err)
+  }
+}
+exports.updateProduct = async (req, res, next) => {
+  try {
+    const product = await ProductCategoryModel.find({ _id: req.params.productId })
+    console.log(product)
+    res.status(200).json(product)
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500
+    }
+    next(err)
   }
 }
 exports.productCategories = async (req, res, next) => {
