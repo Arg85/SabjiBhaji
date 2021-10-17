@@ -17,7 +17,9 @@ const router = require('express').Router()
 router.post('/productCategory', isAuth, upload.single('image'), productController.addProductCategory)
 router.delete('/productCategory/:categoryId', isAuth, productController.deleteProductCategory)
 router.put('/productCategory/:categoryId', isAuth, upload.single('image'), productController.updateProductCategory)
-router.post('/seed/product', isAuth, upload.single('image'), productController.addProduct)
+router.post('/:categoryId', isAuth, upload.single('image'), productController.addProduct)
+router.get('/', productController.allProducts)
+// router.put('/:productId', productController.updateProduct)
 router.get('/productCategory', productController.productCategories)
 
 module.exports = router

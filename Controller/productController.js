@@ -1,4 +1,5 @@
 const ProductCategoryModel = require('../models/productCategoryModel')
+const ProductModel = require('../models/productModel')
 const User = require('../models/UserModel')
 const path = require('path')
 const fs = require('fs')
@@ -27,21 +28,36 @@ exports.addProductCategory = async (req, res, next) => {
   }
 }
 exports.addProduct = async (req, res, next) => {
-  const newProduct = new ProductCategoryModel({
-    productCategoryName: req.body.Category,
-    productCategoryImage: req.file.path
+  const newProduct = new ProductModel({
+    productName: req.body.productName,
+    productPrice: req.body.productPrice,
+    productImage: req.file.path,
+    productCategory: [req.params.categoryId]
   })
   try {
     const savedProduct = await newProduct.save()
+    console.log(savedProduct)
     res.json({
-      productCategoryName: savedProduct.productCategoryName,
-      productCategoryImage: savedProduct.productCategoryImage,
-      _id: newProduct._id
+      message: 'successs'
     })
   } catch (err) {
     console.log(err)
     res.status(500).json(err)
   }
+}
+exports.updateProduct = async (req, res, next) => {
+  const resy = await ProductModel.findByIdAndUpdate({ _id: req.params.productId }, { $push: { productCategory: req.body.categoryId } },
+    function (err, docs) {
+      if (err) {
+        const error = new Error('Product Category Unable to Update')
+        error.statusCode = 404
+        throw error
+      } else {
+        console.log(docs)
+      }
+    }).clone().catch((err) => console.log(err))
+  console.log(resy)
+  res.status(200).json({ message: 'succesufly udapted' })
 }
 exports.productCategories = async (req, res, next) => {
   try {
@@ -49,7 +65,23 @@ exports.productCategories = async (req, res, next) => {
     res.status(200).json(productCategories)
   } catch (err) {
     if (!err.statusCode) {
-      err.statusCode = 500
+      const error = new Error('No product Found')
+      error.statusCode = 401
+      throw error
+    }
+    next(err)
+  }
+}
+exports.allProducts = async (req, res, next) => {
+  try {
+    const products = await ProductModel.find().populate('productCategory')
+    console.log(products)
+    res.status(200).json(products)
+  } catch (err) {
+    if (!err.statusCode) {
+      const error = new Error('No product Found')
+      error.statusCode = 401
+      throw error
     }
     next(err)
   }
