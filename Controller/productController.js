@@ -10,9 +10,17 @@ exports.addProductCategory = async (req, res, next) => {
       productCategoryName: req.body.Category,
       productCategoryImage: req.file.path
     })
-    // if (!user.isAdmin || user.isAdmin == null) {
+    const user = await User.findOne({ username: req.body.username })
+    console.log(user.isAdmin, 'user hu')
+    console.log(user.isAdmin === 'false', 'user hu1')
+    if (user.isAdmin === 'false') {
+      const error = new Error('Unauthorized')
+      console.log(error)
+      error.statusCode = 401
+      throw error
+    }
+    // if (user.isAdmin === 'false') {
     //   const error = new Error('Unauthorized')
-    //   console.log(error)
     //   error.statusCode = 401
     //   throw error
     // }
@@ -57,7 +65,7 @@ exports.updateProduct = async (req, res, next) => {
       }
     }).clone().catch((err) => console.log(err))
   console.log(resy)
-  res.status(200).json({ message: 'succesufly udapted' })
+  res.status(200).json({ message: 'successfully udapted' })
 }
 exports.productCategories = async (req, res, next) => {
   try {
