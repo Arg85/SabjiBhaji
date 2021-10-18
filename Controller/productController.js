@@ -46,7 +46,7 @@ exports.addProduct = async (req, res, next) => {
   }
 }
 exports.updateProduct = async (req, res, next) => {
-  const resy = await ProductModel.findByIdAndUpdate({ _id: req.params.productId }, { $push: { productCategory: req.body.categoryId } },
+  const resy = await ProductModel.findByIdAndUpdate({ _id: req.params.productId }, { $set: { productPrice: req.body.productPrice } },
     function (err, docs) {
       if (err) {
         const error = new Error('Product Category Unable to Update')

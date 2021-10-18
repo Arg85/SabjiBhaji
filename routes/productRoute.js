@@ -19,7 +19,7 @@ router.delete('/productCategory/:categoryId', isAuth, productController.deletePr
 router.put('/productCategory/:categoryId', isAuth, upload.single('image'), productController.updateProductCategory)
 router.post('/:categoryId', isAuth, upload.single('image'), productController.addProduct)
 router.get('/', productController.allProducts)
-// router.put('/:productId', productController.updateProduct)
+router.put('/:productId', productController.updateProduct)
 router.get('/productCategory', productController.productCategories)
 
 module.exports = router
