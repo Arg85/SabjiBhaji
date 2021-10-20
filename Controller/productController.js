@@ -11,14 +11,11 @@ exports.addProductCategory = async (req, res, next) => {
       productCategoryImage: req.file.path
     })
     const user = await User.findOne({ username: req.body.username })
-    console.log(user.isAdmin, 'user hu')
-    console.log(user.isAdmin === 'false', 'user hu1')
-    if (user.isAdmin === 'false') {
+    if (!user.isAdmin || user.isAdmin === 'false') {
       const error = new Error('Unauthorized')
-      console.log(error)
       error.statusCode = 401
       throw error
-    }
+    }// now try
     // if (user.isAdmin === 'false') {
     //   const error = new Error('Unauthorized')
     //   error.statusCode = 401
@@ -31,9 +28,21 @@ exports.addProductCategory = async (req, res, next) => {
       _id: newProduct._id
     })
   } catch (err) {
-    console.log(err)
-    res.status(500).json(err)
+    if (!err.statusCode) {
+      const error = new Error('Product Category Could not be Added')
+      error.statusCode = 401
+      throw error
+    }
+    next(err)
   }
+
+  // catch (err) {
+  //   if (!err.statusCode) {
+  //     const error = new Error('No product Found')
+  //     error.statusCode = 401
+  //     throw error
+  //   }
+  //   next(err)
 }
 exports.addProduct = async (req, res, next) => {
   const newProduct = new ProductModel({
@@ -54,17 +63,32 @@ exports.addProduct = async (req, res, next) => {
   }
 }
 exports.updateProduct = async (req, res, next) => {
-  const resy = await ProductModel.findByIdAndUpdate({ _id: req.params.productId }, { $set: { productPrice: req.body.productPrice } },
-    function (err, docs) {
-      if (err) {
-        const error = new Error('Product Category Unable to Update')
-        error.statusCode = 404
-        throw error
-      } else {
-        console.log(docs)
-      }
-    }).clone().catch((err) => console.log(err))
-  console.log(resy)
+  const user = await User.findOne({ username: req.body.username })
+  try {
+    if (!user.isAdmin || user.isAdmin === 'false') {
+      const error = new Error('Unauthorized')
+      error.statusCode = 401
+      throw error
+    }// now try
+    const resy = await ProductModel.findByIdAndUpdate({ _id: req.params.productId }, { $set: { productPrice: req.body.productPrice } },
+      function (err, docs) {
+        if (err) {
+          const error = new Error('Product Category Unable to Update')
+          error.statusCode = 404
+          throw error
+        } else {
+          console.log(docs)
+        }
+      }).clone().catch((err) => console.log(err))
+    console.log(resy)
+  } catch (err) {
+    if (!err.statusCode) {
+      const error = new Error('No product Found')
+      error.statusCode = 401
+      throw error
+    }
+    next(err)
+  }
   res.status(200).json({ message: 'successfully udapted' })
 }
 exports.productCategories = async (req, res, next) => {
@@ -100,7 +124,7 @@ exports.deleteProductCategory = async (req, res, next) => {
     const user = await User.findOne({ username: req.body.username })
     const categoryId = req.params.categoryId
     console.log(categoryId, 'category id')
-    if (!user.isAdmin) {
+    if (!user.isAdmin || user.isAdmin === 'false') {
       const error = new Error('Unauthorized')
       error.statusCode = 401
       throw error
@@ -127,15 +151,17 @@ exports.deleteProductCategory = async (req, res, next) => {
 exports.updateProductCategory = async (req, res, next) => {
   const user = await User.findOne({ username: req.body.username })
   const categoryId = req.params.categoryId
-  if (!req.body.category == null && req.file.path == null) {
-    const error = new Error('Enter Valid Product Image and Name')
-    error.statusCode = 404
-    throw error
-  }
+  console.log(user.isAdmin)
   try {
-    if (!user.isAdmin) {
+    if (!user.isAdmin || user.isAdmin === 'false') {
+      console.log('asd')
       const error = new Error('Unauthorized')
       error.statusCode = 401
+      throw error
+    }
+    if (req.body.category == null && !req.file) {
+      const error = new Error('Enter Valid Product Image and Name')
+      error.statusCode = 404
       throw error
     }
     const imageUrl = await ProductCategoryModel.findById(categoryId)
